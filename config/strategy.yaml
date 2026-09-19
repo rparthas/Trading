@@ -1,0 +1,210 @@
+# Trading Analyst Agent — Strategy Specification
+# Source: Zerodha Varsity Module 2 (Technical Analysis)
+# Reference: docs/TA.md (Ch. 5-8 patterns, Ch. 18 RRR, Ch. 19 scanning)
+
+version: "1.0.0"
+
+universe:
+  type: nifty50
+  symbols_source: config/nifty50.csv
+
+timeframe:
+  primary: 1d
+  lookback_months: 12          # Ch. 19: 6-12 months for swing
+  sr_lookback_months: 24       # Ch. 19: 2 years for S/R levels
+  holding_period_days: [3, 10] # Ch. 1.3: short-term positional
+
+# --- Global candle rules (Ch. 5) ---
+global:
+  prior_trend:
+    bullish_patterns_require: downtrend
+    bearish_patterns_require: uptrend
+    exceptions: [bullish_marubozu, bearish_marubozu]  # Ch. 5.2: Marubozu exempt
+  candle_range_pct:
+    min: 1.0   # Ch. 5: avoid abnormally small candles
+    max: 10.0  # Ch. 5: avoid abnormally large candles
+  stoploss:
+    long: lowest_low_of_pattern   # Ch. 8
+    short: highest_high_of_pattern
+
+# --- Qualification gates (Ch. 18-19) ---
+gates:
+  # Mandatory gates — failure = NO TRADE
+  pattern_detected:
+    type: mandatory
+    source: "Ch. 19 Part 1"
+  prior_trend:
+    type: mandatory
+    source: "Ch. 19 Part 2 step 2"
+  volume_confirmed:
+    type: mandatory
+    source: "Ch. 19 Part 2 step 4"
+  support_resistance_exists:
+    type: mandatory
+    source: "Ch. 19 Part 2 step 5"
+  stop_aligned_with_sr:
+    type: mandatory
+    source: "Ch. 19 Part 2 step 5"
+  risk_reward_minimum:
+    type: mandatory
+    source: "Ch. 18.5, Ch. 19 Part 2 step 7"
+  # Confirmatory — can scale position size, not block trade
+  dow_pattern:
+    type: confirmatory
+    source: "Ch. 19 Part 2 step 6"
+  macd_confirms:
+    type: confirmatory
+    source: "Ch. 19 Part 2 step 8"
+  rsi_confirms:
+    type: confirmatory
+    source: "Ch. 19 Part 2 step 8"
+
+volume:
+  average_period: 10
+  minimum_ratio: 1.0           # Ch. 19: >= 10-day average
+  confirm_both_pattern_days: true  # Ch. 18.6 checklist
+
+support_resistance:
+  max_stop_distance_pct: 4.0   # Ch. 19: skip if S/R > 4% from stop
+
+risk_reward:
+  minimum: 1.5                 # Ch. 18.5, Ch. 19
+
+risk:
+  account_size: 1000000        # INR, configurable
+  max_risk_per_trade_pct: 0.5
+  max_position_pct: 10.0
+  max_open_positions: 5
+  indicator_confirmation_size_multiplier: 1.25  # Ch. 19: increase size if MACD/RSI confirm
+
+indicators:
+  rsi:
+    period: 14
+  macd:
+    fast: 12
+    slow: 26
+    signal: 9
+  ma_periods: [20, 50, 100, 200]
+
+# --- Pattern definitions (Ch. 5-8) ---
+patterns:
+  bullish_marubozu:
+    direction: LONG
+    prior_trend: any
+    min_body_ratio: 0.95
+    upper_shadow_max_ratio: 0.02
+    lower_shadow_max_ratio: 0.02
+    entry: close
+    stop: low
+
+  bearish_marubozu:
+    direction: SHORT
+    prior_trend: any
+    min_body_ratio: 0.95
+    upper_shadow_max_ratio: 0.02
+    lower_shadow_max_ratio: 0.02
+    entry: close
+    stop: high
+
+  hammer:
+    direction: LONG
+    prior_trend: downtrend
+    lower_shadow_to_body_min: 2.0
+    upper_shadow_max_ratio: 0.10
+    open_close_tolerance_pct: 2.0
+    entry: close
+    stop: low
+
+  hanging_man:
+    direction: SHORT
+    prior_trend: uptrend
+    lower_shadow_to_body_min: 2.0
+    upper_shadow_max_ratio: 0.10
+    entry: close
+    stop: high
+
+  shooting_star:
+    direction: SHORT
+    prior_trend: uptrend
+    upper_shadow_to_body_min: 2.0
+    lower_shadow_max_ratio: 0.10
+    entry: close
+    stop: high
+
+  doji:
+    direction: NEUTRAL
+    prior_trend: any
+    body_max_ratio: 0.05
+    standalone_trade: false
+    position_size_multiplier: 0.5
+
+  spinning_top:
+    direction: NEUTRAL
+    prior_trend: any
+    body_max_ratio: 0.30
+    shadow_balance_tolerance: 0.20
+    standalone_trade: false
+    position_size_multiplier: 0.5
+
+  bullish_engulfing:
+    direction: LONG
+    prior_trend: downtrend
+    p2_body_engulfs_p1_body: true
+    entry: p2_close
+    stop: min_low_p1_p2
+
+  bearish_engulfing:
+    direction: SHORT
+    prior_trend: uptrend
+    p2_body_engulfs_p1_body: true
+    entry: p2_close
+    stop: max_high_p1_p2
+
+  bullish_harami:
+    direction: LONG
+    prior_trend: downtrend
+    p2_inside_p1: true
+    entry: p2_close
+    stop: min_low_p1_p2
+
+  bearish_harami:
+    direction: SHORT
+    prior_trend: uptrend
+    p2_inside_p1: true
+    entry: p2_close
+    stop: max_high_p1_p2
+
+  piercing_pattern:
+    direction: LONG
+    prior_trend: downtrend
+    p2_engulf_pct_min: 50.0
+    p2_engulf_pct_max: 99.99
+    entry: p2_close
+    stop: pattern_low
+
+  dark_cloud_cover:
+    direction: SHORT
+    prior_trend: uptrend
+    p2_engulf_pct_min: 50.0
+    p2_engulf_pct_max: 99.99
+    entry: p2_close
+    stop: max_high_p1_p2
+
+  morning_star:
+    direction: LONG
+    prior_trend: downtrend
+    p2_gap: down
+    p2_types: [doji, spinning_top]
+    p3_gap: up
+    p3_close_above_p1_open: true
+    entry: p3_close
+    stop: min_low_p1_p2_p3
+
+  evening_star:
+    direction: SHORT
+    prior_trend: uptrend
+    p2_gap: up
+    p2_types: [doji, spinning_top]
+    p3_gap: down
+    entry: p3_close
+    stop: max_high_p1_p2_p3

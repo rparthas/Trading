@@ -1,0 +1,25 @@
+# Core
+pandas>=2.2.0
+numpy>=1.26.0
+pydantic>=2.6.0
+pyyaml>=6.0.1
+
+# Data (adapter chosen at runtime via config)
+yfinance>=0.2.36
+
+# Indicators & charts (M3+)
+ta-lib>=0.4.28; platform_system != "Windows"
+
+# UI (M6)
+streamlit>=1.32.0
+plotly>=5.19.0
+
+# LLM (M7)
+openai>=1.14.0
+
+# Backtest & reports (M5)
+matplotlib>=3.8.0
+
+# Dev
+pytest>=8.0.0
+pytest-cov>=4.1.0

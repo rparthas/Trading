@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+.pytest_cache/
+htmlcov/
+.coverage
+.mypy_cache/
+.ruff_cache/
+
+# Environment & secrets
+.env
+.env.*
+*.pem
+credentials.json
+
+# Data cache
+data/cache/
+*.parquet
+*.sqlite
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backtest outputs
+backtest/output/
+*.png
+!docs/**/*.png
+
+# Streamlit
+.streamlit/secrets.toml
