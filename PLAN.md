@@ -91,7 +91,7 @@ Pattern → Prior Trend → Volume → S/R alignment → Dow structure → R:R �
 | S0.1 | Initialize git repo | `git init -b main` in `/Users/rparthas/git/Trading`; `.gitignore` covers `.env`, `__pycache__`, `.venv`, `data/cache/` |
 | S0.2 | Add project plan | `PLAN.md` (this document) committed as first artifact |
 | S0.3 | Add README | One-page overview: purpose, architecture diagram, milestone roadmap, how to run (placeholder) |
-| S0.4 | Scaffold directories | Empty package dirs per structure below; `requirements.txt` with pinned core deps |
+| S0.4 | Scaffold directories | Empty package dirs per structure below; `pyproject.toml` + `uv.lock` for deps |
 | S0.5 | Push to Cursor-hosted repo | Follow `new-repo` skill: `origin repo create trading-analyst`, push `main` |
 
 ### Target structure

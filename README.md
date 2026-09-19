@@ -60,18 +60,20 @@ Rules are encoded from [Zerodha Varsity Module 2 — Technical Analysis](https:/
 
 See [PLAN.md](PLAN.md) for full story-level breakdown.
 
-## Quick start (once M2+ complete)
+## Quick start
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+# Install uv: https://docs.astral.sh/uv/getting-started/installation/
+uv sync --all-groups
 
-# Daily scan
-python -m strategy.scanner --date 2026-09-19
+# Run tests
+uv run pytest
+
+# Daily scan (M4+)
+uv run python -m strategy.scanner --date 2026-09-19
 
 # Streamlit UI (M6)
-streamlit run app.py
+uv run streamlit run app.py
 ```
 
 ## Design principles
