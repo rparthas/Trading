@@ -34,8 +34,11 @@ class CachedDataLoader:
 
         if self.cache.covers_range(symbol, start_ts, end_ts):
             cached = self.cache.read_range(symbol, start_ts, end_ts)
+            # Re-fetch if cache slice is stale (e.g. partial write left gaps before end date)
             if cached is not None and not cached.empty:
-                return cached
+                last_bar = cached.index.max()
+                if (end_ts.normalize() - last_bar).days <= 7:
+                    return cached
 
         fetched = self.loader.load_ohlcv(symbol, start, end)
 

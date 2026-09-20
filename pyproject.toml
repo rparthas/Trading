@@ -16,6 +16,7 @@ dependencies = [
     "plotly>=5.19.0",
     "openai>=1.14.0",
     "matplotlib>=3.8.0",
+    "watchdog>=6.0.0",
 ]
 
 [dependency-groups]
@@ -24,11 +25,16 @@ dev = [
     "pytest-cov>=4.1.0",
 ]
 
+[project.scripts]
+taa-scan = "strategy.scanner:main"
+taa-backtest = "backtest.run:main"
+
 [tool.uv]
 package = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+python_files = ["test_*.py", "tests_*.py"]
 markers = [
     "integration: tests that fetch live market data",
 ]

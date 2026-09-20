@@ -50,13 +50,13 @@ Rules are encoded from [Zerodha Varsity Module 2 — Technical Analysis](https:/
 | # | Milestone | Status |
 |---|-----------|--------|
 | 0 | Repo bootstrap + plan | Done |
-| 1 | Strategy specification (`strategy.yaml`, models) | In progress |
-| 2 | Market data layer (pluggable loader) | Pending |
-| 3 | Technical analysis engine | Pending |
-| 4 | Trade qualification + scanner | Pending |
-| 5 | Backtesting (validation gate) | Pending |
-| 6 | Streamlit UI | Pending |
-| 7 | OpenAI analyst layer | Pending |
+| 1 | Strategy specification (`strategy.yaml`, models) | Done |
+| 2 | Market data layer (pluggable loader) | Done |
+| 3 | Technical analysis engine | Done |
+| 4 | Trade qualification + scanner | Done |
+| 5 | Backtesting (validation gate) | Done |
+| 6 | Streamlit UI | Done |
+| 7 | OpenAI analyst layer | Done |
 
 See [PLAN.md](PLAN.md) for full story-level breakdown.
 
@@ -69,12 +69,17 @@ uv sync --all-groups
 # Run tests
 uv run pytest
 
-# Daily scan (M4+)
-uv run python -m strategy.scanner --date 2026-09-19
+# Daily scan (--verbose shows why stocks were rejected)
+uv run python -m strategy.scanner --date 2026-09-18 --verbose
 
-# Streamlit UI (M6)
+# Backtest
+uv run python -m backtest.run --start 2024-01-01 --end 2026-09-01
+
+# Streamlit UI
 uv run streamlit run app.py
 ```
+
+Set `OPENAI_API_KEY` for LLM explanations (template fallback works without it).
 
 ## Design principles
 

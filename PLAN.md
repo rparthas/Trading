@@ -11,7 +11,7 @@ Build a **deterministic trading-analysis engine** with an **LLM analyst on top**
 
 **Source of truth:** [TA.md](/Users/rparthas/git/DigitalBrain/0.Inbox/TA.md) — Zerodha Varsity Module 2 (Technical Analysis), especially Chapter 19 scanning checklist and Chapter 18 RRR rules.
 
-**Workspace:** [`/Users/rparthas/git/Trading`](/Users/rparthas/git/Trading) — repo bootstrapped (M0 complete, M1 in progress).
+**Workspace:** [`/Users/rparthas/git/Trading`](/Users/rparthas/git/Trading) — all milestones M0–M7 complete.
 
 ---
 

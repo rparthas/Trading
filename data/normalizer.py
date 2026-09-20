@@ -33,6 +33,10 @@ def normalize_ohlcv(df: pd.DataFrame, symbol: str | None = None) -> pd.DataFrame
     if not isinstance(out.index, pd.DatetimeIndex):
         out.index = pd.to_datetime(out.index)
 
+    # yfinance returns Asia/Kolkata tz-aware; strip to naive dates for consistent comparisons
+    if out.index.tz is not None:
+        out.index = out.index.tz_localize(None)
+
     out.index = out.index.normalize()
     out = out[~out.index.duplicated(keep="last")]
     out = out.sort_index()
@@ -53,11 +57,20 @@ def normalize_ohlcv(df: pd.DataFrame, symbol: str | None = None) -> pd.DataFrame
     return out
 
 
+def _naive_ts(ts: pd.Timestamp) -> pd.Timestamp:
+    t = pd.Timestamp(ts)
+    if t.tz is not None:
+        t = t.tz_localize(None)
+    return t.normalize()
+
+
 def slice_date_range(df: pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
     """Return rows within [start, end] inclusive."""
     if df.empty:
         return df
-    mask = (df.index >= start.normalize()) & (df.index <= end.normalize())
+    start_n = _naive_ts(start)
+    end_n = _naive_ts(end)
+    mask = (df.index >= start_n) & (df.index <= end_n)
     return df.loc[mask]
 
 

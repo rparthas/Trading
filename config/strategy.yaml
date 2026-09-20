@@ -4,6 +4,11 @@
 
 version: "1.0.0"
 
+data:
+  provider: yfinance
+  symbol_suffix: .NS
+  cache_dir: data/cache
+
 universe:
   type: nifty50
   symbols_source: config/nifty50.csv
