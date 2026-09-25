@@ -8,7 +8,8 @@ from typing import Callable
 
 import pandas as pd
 
-from models.trade import Decision, Direction
+from models.trade import Decision
+from strategy.exit_rules import calc_pnl, check_bar_exit
 from strategy.scanner import analyze_stock, lookback_start
 
 
@@ -89,12 +90,19 @@ def run_backtest(
                 continue
 
             bar = df.loc[bar_ts]
-            exit_price, reason = _check_exit(pos, bar, scan_date)
+            exit_price, reason = check_bar_exit(
+                pos["direction"],
+                pos["stop"],
+                pos["target"],
+                pd.Timestamp(pos["max_exit_date"]),
+                bar,
+                scan_date,
+            )
             if exit_price is None:
                 still_open.append(pos)
                 continue
 
-            pnl = _calc_pnl(pos, exit_price)
+            pnl = calc_pnl(pos["direction"], pos["entry_price"], exit_price, pos["shares"])
             equity += pnl
             trades.append(
                 BacktestTrade(
@@ -183,7 +191,7 @@ def run_backtest(
             if available.empty:
                 continue
             exit_price = float(available.iloc[-1]["close"])
-            pnl = _calc_pnl(pos, exit_price)
+            pnl = calc_pnl(pos["direction"], pos["entry_price"], exit_price, pos["shares"])
             equity += pnl
             exit_date = available.index[-1].date()
             trades.append(
@@ -214,30 +222,3 @@ def run_backtest(
     return BacktestResult(trades=trades, equity_curve=equity_series, initial_capital=capital)
 
 
-def _calc_pnl(pos: dict, exit_price: float) -> float:
-    if pos["direction"] == Direction.LONG.value:
-        return (exit_price - pos["entry_price"]) * pos["shares"]
-    return (pos["entry_price"] - exit_price) * pos["shares"]
-
-
-def _check_exit(pos: dict, bar: pd.Series, current_date: date) -> tuple[float | None, str]:
-    high = float(bar["high"])
-    low = float(bar["low"])
-    close = float(bar["close"])
-
-    max_exit = pd.Timestamp(pos["max_exit_date"])
-    if pd.Timestamp(current_date) >= max_exit:
-        return close, "max_holding"
-
-    if pos["direction"] == Direction.LONG.value:
-        if low <= pos["stop"]:
-            return pos["stop"], "stop"
-        if high >= pos["target"]:
-            return pos["target"], "target"
-    else:
-        if high >= pos["stop"]:
-            return pos["stop"], "stop"
-        if low <= pos["target"]:
-            return pos["target"], "target"
-
-    return None, ""

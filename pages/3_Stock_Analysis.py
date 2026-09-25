@@ -9,6 +9,7 @@ from llm.analyst import explain_trade
 from models.trade import Decision
 from strategy.scanner import analyze_stock
 from ui.display import analysis_gate_rows, trade_plan_dict
+from ui.paper_actions import paper_trade_button
 
 st.header("Stock analysis")
 st.caption("Deep dive on one symbol — gates, trade plan, and optional LLM explanation.")
@@ -65,6 +66,8 @@ else:
 if analysis.trade_plan:
     st.subheader("Trade plan")
     st.table(trade_plan_dict(analysis.trade_plan))
+
+    paper_trade_button(analysis.trade_plan, key=f"paper_{symbol}_{scan_date}")
 
     if st.button("Explain trade", icon=":material/psychology:"):
         with st.spinner("Generating explanation…"):
