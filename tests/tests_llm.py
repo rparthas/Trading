@@ -57,6 +57,8 @@ def test_numbers_are_valid_rejects_altered_values(sample_plan):
 @patch("openai.OpenAI")
 def test_explain_trade_uses_openai_when_key_present(mock_openai_cls, sample_plan, monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
+    monkeypatch.delenv("OPENAI_API_BASE", raising=False)
 
     mock_client = MagicMock()
     mock_openai_cls.return_value = mock_client
@@ -77,6 +79,34 @@ def test_explain_trade_uses_openai_when_key_present(mock_openai_cls, sample_plan
     explanation = explain_trade(sample_plan)
     assert str(sample_plan.entry) in explanation
     mock_client.chat.completions.create.assert_called_once()
+    mock_openai_cls.assert_called_once_with(api_key="test-key")
+
+
+@patch("openai.OpenAI")
+def test_explain_trade_uses_custom_base_url(mock_openai_cls, sample_plan, monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://localhost:11434/v1")
+
+    mock_client = MagicMock()
+    mock_openai_cls.return_value = mock_client
+    mock_client.chat.completions.create.return_value = MagicMock(
+        choices=[
+            MagicMock(
+                message=MagicMock(
+                    content=(
+                        f"Entry {sample_plan.entry}, stop {sample_plan.stop}, "
+                        f"target {sample_plan.target}, R:R {sample_plan.rr}."
+                    )
+                )
+            )
+        ]
+    )
+
+    explain_trade(sample_plan)
+    mock_openai_cls.assert_called_once_with(
+        api_key="test-key",
+        base_url="http://localhost:11434/v1",
+    )
 
 
 @patch("openai.OpenAI")

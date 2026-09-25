@@ -79,7 +79,16 @@ uv run python -m backtest.run --start 2024-01-01 --end 2026-09-01
 uv run streamlit run app.py
 ```
 
-Set `OPENAI_API_KEY` for LLM explanations (template fallback works without it).
+### Family launcher (same Mac, no terminal)
+
+Double-click **`scripts/Launch Trading Analyst.command`**. The first run may take a minute while dependencies install; after that it opens the app in your browser.
+
+- Drag the `.command` file to the Desktop or Dock if you want a shortcut.
+- Use **`scripts/Stop Trading Analyst.command`** to quit if the browser tab is closed but the app is still running.
+- Put LLM settings in `.env` in the project folder once for AI explanations (optional; template fallback works without them):
+  - `OPENAI_API_KEY` — API key for OpenAI or any OpenAI-compatible provider
+  - `OPENAI_BASE_URL` — optional base URL (e.g. `http://localhost:11434/v1` for Ollama, or a proxy/gateway); alias: `OPENAI_API_BASE`
+  - `OPENAI_MODEL` — optional model name (default `gpt-4o-mini`)
 
 ## Design principles
 

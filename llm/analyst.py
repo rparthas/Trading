@@ -13,19 +13,39 @@ _NUMBER_PATTERN = re.compile(r"(?<![\w.])(?:\d+\.\d+|\d+)(?:%)?")
 _FLOAT_TOLERANCE = 1e-4
 
 
+def _openai_base_url() -> str | None:
+    """OpenAI-compatible API base URL (optional; defaults to api.openai.com)."""
+    for name in ("OPENAI_BASE_URL", "OPENAI_API_BASE"):
+        value = os.environ.get(name, "").strip()
+        if value:
+            return value
+    return None
+
+
+def _openai_client():
+    from openai import OpenAI
+
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        return None
+
+    kwargs: dict[str, str] = {"api_key": api_key}
+    base_url = _openai_base_url()
+    if base_url:
+        kwargs["base_url"] = base_url
+    return OpenAI(**kwargs)
+
+
 def explain_trade(plan: TradePlan) -> str:
     """Return a human-readable trade explanation."""
     template = _template_explanation(plan)
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        return template
-
     try:
-        from openai import OpenAI
+        client = _openai_client()
     except ImportError:
         return template
+    if client is None:
+        return template
 
-    client = OpenAI(api_key=api_key)
     model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
     response = client.chat.completions.create(
         model=model,
